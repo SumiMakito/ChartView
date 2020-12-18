@@ -9,17 +9,18 @@ public struct BarChartCell: View {
     var touchLocation: CGFloat
 
     var cellWidth: Double {
-        return Double(width)/(Double(numberOfDataPoints) * 1.5)
+        return Double(width) / (Double(numberOfDataPoints) * 1.5)
     }
 
     @State var firstDisplay: Bool = true
 
-    public init( value: Double,
-                 index: Int = 0,
-                 width: Float,
-                 numberOfDataPoints: Int,
-                 gradientColor: ColorGradient,
-                 touchLocation: CGFloat) {
+    public init(value: Double,
+                index: Int = 0,
+                width: Float,
+                numberOfDataPoints: Int,
+                gradientColor: ColorGradient,
+                touchLocation: CGFloat)
+    {
         self.value = value
         self.index = index
         self.width = width
@@ -30,8 +31,9 @@ public struct BarChartCell: View {
 
     public var body: some View {
         ZStack {
-            RoundedRectangle(cornerRadius: 4)
+            Rectangle()
                 .fill(gradientColor.linearGradient(from: .bottom, to: .top))
+                .cornerRadius(4, corners: [.topLeft, .topRight])
         }
         .frame(width: CGFloat(self.cellWidth))
         .scaleEffect(CGSize(width: 1, height: self.firstDisplay ? 0.0 : self.value), anchor: .bottom)
