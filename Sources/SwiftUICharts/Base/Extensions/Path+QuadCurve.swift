@@ -4,11 +4,11 @@ extension Path {
     func trimmedPath(for percent: CGFloat) -> Path {
         // percent difference between points
         let boundsDistance: CGFloat = 0.001
-        let completion: CGFloat = 1 - boundsDistance
+        let completion: CGFloat = 1-boundsDistance
         
         let pct = percent > 1 ? 0 : (percent < 0 ? 1 : percent)
         
-        let start = pct > completion ? completion : pct - boundsDistance
+        let start = pct > completion ? completion : pct-boundsDistance
         let end = pct > completion ? 1 : pct + boundsDistance
         return trimmedPath(from: start, to: end)
     }
@@ -108,17 +108,17 @@ extension Path {
         return ret
     }
     
-    static func quadCurvedPathWithPoints(points: [Double], step: CGPoint, globalOffset: Double? = nil) -> Path {
+    static func quadCurvedPathWithPoints(points: [Double], step: CGPoint, globalOffset: CGFloat) -> Path {
         var path = Path()
         if points.count < 2 {
             return path
         }
-        let offset = globalOffset ?? points.min()!
+        let offset = points.min()!
 //        guard let offset = points.min() else { return path }
-        var point1 = CGPoint(x: 0, y: CGFloat(points[0]-offset)*step.y)
+        var point1 = CGPoint(x: 0, y: globalOffset + CGFloat(points[0]-offset) * step.y)
         path.move(to: point1)
         for pointIndex in 1..<points.count {
-            let point2 = CGPoint(x: step.x * CGFloat(pointIndex), y: step.y*CGFloat(points[pointIndex]-offset))
+            let point2 = CGPoint(x: step.x * CGFloat(pointIndex), y: globalOffset + step.y * CGFloat(points[pointIndex]-offset))
             let midPoint = CGPoint.midPointForPoints(firstPoint: point1, secondPoint: point2)
             path.addQuadCurve(to: midPoint, control: CGPoint.controlPointForPoints(firstPoint: midPoint, secondPoint: point1))
             path.addQuadCurve(to: point2, control: CGPoint.controlPointForPoints(firstPoint: midPoint, secondPoint: point2))
@@ -127,19 +127,17 @@ extension Path {
         return path
     }
     
-    static func quadClosedCurvedPathWithPoints(points: [Double], step: CGPoint, globalOffset: Double? = nil) -> Path {
+    static func quadClosedCurvedPathWithPoints(points: [Double], step: CGPoint, globalOffset: CGFloat = 0) -> Path {
         var path = Path()
         if points.count < 2 {
             return path
         }
-        let offset = globalOffset ?? points.min()!
-
-//        guard let offset = points.min() else { return path }
+        let offset = points.min()!
         path.move(to: .zero)
-        var point1 = CGPoint(x: 0, y: CGFloat(points[0]-offset)*step.y)
+        var point1 = CGPoint(x: 0, y: globalOffset + CGFloat(points[0]-offset) * step.y)
         path.addLine(to: point1)
         for pointIndex in 1..<points.count {
-            let point2 = CGPoint(x: step.x * CGFloat(pointIndex), y: step.y*CGFloat(points[pointIndex]-offset))
+            let point2 = CGPoint(x: step.x * CGFloat(pointIndex), y: globalOffset + step.y * CGFloat(points[pointIndex]-offset))
             let midPoint = CGPoint.midPointForPoints(firstPoint: point1, secondPoint: point2)
             path.addQuadCurve(to: midPoint, control: CGPoint.controlPointForPoints(firstPoint: midPoint, secondPoint: point1))
             path.addQuadCurve(to: point2, control: CGPoint.controlPointForPoints(firstPoint: midPoint, secondPoint: point2))
@@ -158,10 +156,10 @@ extension Path {
         guard let offset = points.min() else {
             return path
         }
-        let point1 = CGPoint(x: 0, y: CGFloat(points[0]-offset)*step.y)
+        let point1 = CGPoint(x: 0, y: CGFloat(points[0]-offset) * step.y)
         path.move(to: point1)
         for pointIndex in 1..<points.count {
-            let point2 = CGPoint(x: step.x * CGFloat(pointIndex), y: step.y*CGFloat(points[pointIndex]-offset))
+            let point2 = CGPoint(x: step.x * CGFloat(pointIndex), y: step.y * CGFloat(points[pointIndex]-offset))
             path.addLine(to: point2)
         }
         return path
@@ -175,23 +173,22 @@ extension Path {
         guard let offset = points.min() else {
             return path
         }
-        var point1 = CGPoint(x: 0, y: CGFloat(points[0]-offset)*step.y)
+        var point1 = CGPoint(x: 0, y: CGFloat(points[0]-offset) * step.y)
         path.move(to: point1)
         for pointIndex in 1..<points.count {
-            point1 = CGPoint(x: step.x * CGFloat(pointIndex), y: step.y*CGFloat(points[pointIndex]-offset))
+            point1 = CGPoint(x: step.x * CGFloat(pointIndex), y: step.y * CGFloat(points[pointIndex]-offset))
             path.addLine(to: point1)
         }
         path.addLine(to: CGPoint(x: point1.x, y: 0))
         path.closeSubpath()
         return path
     }
-    
 }
 
 extension CGPoint {
     func point(to: CGPoint, x: CGFloat) -> CGPoint {
-        let a = (to.y - self.y) / (to.x - self.x)
-        let y = self.y + (x - self.x) * a
+        let a = (to.y-self.y) / (to.x-self.x)
+        let y = self.y + (x-self.x) * a
         return CGPoint(x: x, y: y)
     }
     
@@ -209,7 +206,7 @@ extension CGPoint {
         
         for i in 0..<Int(steps) {
             let t0 = CGFloat(i) / steps
-            let t1 = CGFloat(i+1) / steps
+            let t1 = CGFloat(i + 1) / steps
             let a = point(to: to, t: t0, control: control)
             let b = point(to: to, t: t1, control: control)
             
@@ -224,7 +221,7 @@ extension CGPoint {
         
         for i in 0..<Int(steps) {
             let t0 = CGFloat(i) / steps
-            let t1 = CGFloat(i+1) / steps
+            let t1 = CGFloat(i + 1) / steps
             let a = point(to: to, t: t0, control: control)
             let b = point(to: to, t: t1, control: control)
             
@@ -256,7 +253,7 @@ extension CGPoint {
         
         for i in 0..<Int(steps) {
             let t0 = CGFloat(i) / steps
-            let t1 = CGFloat(i+1) / steps
+            let t1 = CGFloat(i + 1) / steps
             
             let a = point(to: to, t: t0, control1: control1, control2: control2)
             let b = point(to: to, t: t1, control1: control1, control2: control2)
@@ -273,7 +270,7 @@ extension CGPoint {
         
         for i in 0..<Int(steps) {
             let t0 = CGFloat(i) / steps
-            let t1 = CGFloat(i+1) / steps
+            let t1 = CGFloat(i + 1) / steps
             
             let a = point(to: to, t: t0, control1: control1, control2: control2)
             let b = point(to: to, t: t1, control1: control1, control2: control2)
@@ -322,24 +319,25 @@ extension CGPoint {
     
     static func getMidPoint(point1: CGPoint, point2: CGPoint) -> CGPoint {
         return CGPoint(
-            x: point1.x + (point2.x - point1.x) / 2,
-            y: point1.y + (point2.y - point1.y) / 2
+            x: point1.x + (point2.x-point1.x) / 2,
+            y: point1.y + (point2.y-point1.y) / 2
         )
     }
     
     func dist(to: CGPoint) -> CGFloat {
-        return sqrt((pow(self.x - to.x, 2) + pow(self.y - to.y, 2)))
+        return sqrt(pow(x-to.x, 2) + pow(y-to.y, 2))
     }
     
     static func midPointForPoints(firstPoint: CGPoint, secondPoint: CGPoint) -> CGPoint {
         return CGPoint(
             x: (firstPoint.x + secondPoint.x) / 2,
-            y: (firstPoint.y + secondPoint.y) / 2)
+            y: (firstPoint.y + secondPoint.y) / 2
+        )
     }
     
     static func controlPointForPoints(firstPoint: CGPoint, secondPoint: CGPoint) -> CGPoint {
         var controlPoint = CGPoint.midPointForPoints(firstPoint: firstPoint, secondPoint: secondPoint)
-        let diffY = abs(secondPoint.y - controlPoint.y)
+        let diffY = abs(secondPoint.y-controlPoint.y)
         
         if firstPoint.y < secondPoint.y {
             controlPoint.y += diffY

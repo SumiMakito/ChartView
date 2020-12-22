@@ -7,13 +7,18 @@ public struct Line: View {
 
     var style: ChartStyle
 
-    @State var showIndicator: Bool = false
+    let vpHeightPercent: CGFloat
+
     @State var touchLocation: CGPoint = .zero
-    @State private var showFull: Bool = false
+    @State private var showFull: Bool = true
     @State var showBackground: Bool = true
     var curvedLines: Bool = true
     var step: CGPoint {
-        return CGPoint.getStep(frame: frame, data: chartData.data)
+        return CGPoint.getStep(frame: frame, vpHeightPercent: vpHeightPercent, data: chartData.data)
+    }
+
+    var globalOffset: CGFloat {
+        return CGFloat(frame.size.height * (1.0 - vpHeightPercent) * 0.5)
     }
 
     var path: Path {
@@ -22,24 +27,24 @@ public struct Line: View {
         if curvedLines {
             return Path.quadCurvedPathWithPoints(points: points,
                                                  step: step,
-                                                 globalOffset: nil)
+                                                 globalOffset: globalOffset)
         }
 
         return Path.linePathWithPoints(points: points, step: step)
     }
-    
+
     var closedPath: Path {
         let points = chartData.data
 
         if curvedLines {
             return Path.quadClosedCurvedPathWithPoints(points: points,
-                                            step: step,
-                                            globalOffset: nil)
+                                                       step: step,
+                                                       globalOffset: globalOffset)
         }
 
         return Path.closedLinePathWithPoints(points: points, step: step)
     }
-    
+
     public var body: some View {
         GeometryReader { geometry in
             ZStack {
@@ -47,29 +52,10 @@ public struct Line: View {
                     self.getBackgroundPathView()
                 }
                 self.getLinePathView()
-                if self.showIndicator {
-                    IndicatorPoint()
-                        .position(self.getClosestPointOnPath(touchLocation: self.touchLocation))
-                        .rotationEffect(.degrees(180), anchor: .center)
-                        .rotation3DEffect(.degrees(180), axis: (x: 0, y: 1, z: 0))
-                }
             }
             .onAppear {
                 self.frame = geometry.frame(in: .local)
             }
-            .gesture(DragGesture()
-                .onChanged({ value in
-                    self.touchLocation = value.location
-                    self.showIndicator = true
-                    self.getClosestDataPoint(point: self.getClosestPointOnPath(touchLocation: value.location))
-                    self.chartValue.interactionInProgress = true
-                })
-                .onEnded({ value in
-                    self.touchLocation = .zero
-                    self.showIndicator = false
-                    self.chartValue.interactionInProgress = false
-                })
-            )
         }
     }
 }
@@ -78,57 +64,47 @@ public struct Line: View {
 
 extension Line {
     private func getClosestPointOnPath(touchLocation: CGPoint) -> CGPoint {
-        let closest = self.path.point(to: touchLocation.x)
+        let closest = path.point(to: touchLocation.x)
         return closest
     }
 
     private func getClosestDataPoint(point: CGPoint) {
-        let index = Int(round((point.x)/step.x))
-        if (index >= 0 && index < self.chartData.data.count){
-            self.chartValue.currentValue = self.chartData.data[index]
+        let index = Int(round(point.x / step.x))
+        if index >= 0, index < chartData.data.count {
+            chartValue.currentValue = chartData.data[index]
         }
     }
 
     private func getBackgroundPathView() -> some View {
-        self.closedPath
+        closedPath
             .fill(LinearGradient(gradient: Gradient(colors: [
-                                                        style.foregroundColor.first?.startColor ?? .white,
-                                                        style.foregroundColor.first?.endColor ?? .white,
-                                                        .white]),
-                                 startPoint: .bottom,
-                                 endPoint: .top))
+                    style.foregroundColor.first?.startColor ?? .white,
+                    style.foregroundColor.first?.endColor ?? .white,
+                    .white,
+                ]),
+                startPoint: .bottom,
+                endPoint: .top))
             .rotationEffect(.degrees(180), anchor: .center)
             .rotation3DEffect(.degrees(180), axis: (x: 0, y: 1, z: 0))
             .opacity(0.2)
-            .transition(.opacity)
-            .animation(.easeIn(duration: 1.6))
     }
 
     private func getLinePathView() -> some View {
-        self.path
-            .trim(from: 0, to: self.showFull ? 1:0)
+        path
             .stroke(LinearGradient(gradient: style.foregroundColor.first?.gradient ?? ColorGradient.orangeBright.gradient,
                                    startPoint: .leading,
                                    endPoint: .trailing),
                     style: StrokeStyle(lineWidth: 3, lineJoin: .round))
             .rotationEffect(.degrees(180), anchor: .center)
             .rotation3DEffect(.degrees(180), axis: (x: 0, y: 1, z: 0))
-            .animation(Animation.easeOut(duration: 1.2))
-            .onAppear {
-                self.showFull = true
-            }
-            .onDisappear {
-                self.showFull = false
-            }
-            .drawingGroup()
     }
 }
 
 struct Line_Previews: PreviewProvider {
     static var previews: some View {
         Group {
-            Line(chartData:  ChartData([8, 23, 32, 7, 23, 43]), style: blackLineStyle)
-            Line(chartData:  ChartData([8, 23, 32, 7, 23, 43]), style: redLineStyle)
+            Line(chartData: ChartData([8, 23, 32, 7, 23, 43]), style: redLineStyle, vpHeightPercent: 0.8)
+                .previewLayout(PreviewLayout.fixed(width: 300, height: 300))
         }
     }
 }

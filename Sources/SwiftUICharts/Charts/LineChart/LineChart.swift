@@ -5,10 +5,13 @@ public struct LineChart: View, ChartBase {
 
     @EnvironmentObject var data: ChartData
     @EnvironmentObject var style: ChartStyle
+    var vpHeightPercent: CGFloat
 
     public var body: some View {
-        Line(chartData: data, style: style)
+        Line(chartData: data, style: style, vpHeightPercent: vpHeightPercent)
     }
-    
-    public init() {}
+
+    public init(vpHeightPercent: CGFloat? = nil) {
+        self.vpHeightPercent = vpHeightPercent ?? 0.8
+    }
 }
