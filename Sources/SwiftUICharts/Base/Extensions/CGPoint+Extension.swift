@@ -1,7 +1,7 @@
 import SwiftUI
 
 extension CGPoint {
-    static func getStep(frame: CGRect, vpHeightPercent: CGFloat, data: [Double]) -> CGPoint {
+    static func getStep(frame: CGRect, data: [Double], paddingBottom: Double) -> CGPoint {
         // stepWidth
         var stepWidth: CGFloat = 0.0
         if data.count < 2 {
@@ -21,11 +21,11 @@ extension CGPoint {
             return .zero
         }
         if let min = min, let max = max, min != max {
-            if min <= 0 {
-                stepHeight = frame.size.height * vpHeightPercent / CGFloat(max - min)
-            } else {
-                stepHeight = frame.size.height * vpHeightPercent / CGFloat(max + min)
-            }
+//            if min <= 0 {
+            stepHeight = (frame.size.height - CGFloat(paddingBottom)) / CGFloat(max - min)
+//            } else {
+//                stepHeight = frame.size.height / CGFloat(max + min)
+//            }
         }
 
         return CGPoint(x: stepWidth, y: stepHeight)
