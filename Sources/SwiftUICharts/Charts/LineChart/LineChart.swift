@@ -10,4 +10,8 @@ public struct LineChart: View, ChartBase {
     public var body: some View {
         Line(chartData: data, style: style, paddingBottomPercentage: paddingBottomPercentage)
     }
+
+    init(paddingBottomPercentage: paddingBottomPercentage = 0) {
+        self.paddingBottomPercentage = paddingBottomPercentage
+    }
 }
