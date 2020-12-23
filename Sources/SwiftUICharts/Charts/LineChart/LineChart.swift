@@ -11,7 +11,7 @@ public struct LineChart: View, ChartBase {
         Line(chartData: data, style: style, paddingBottomPercentage: paddingBottomPercentage)
     }
 
-    init(paddingBottomPercentage: Double = 0) {
+    public init(paddingBottomPercentage: Double = 0) {
         self.paddingBottomPercentage = paddingBottomPercentage
     }
 }
