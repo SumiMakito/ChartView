@@ -11,15 +11,20 @@ public struct Line: View {
     @State private var showFull: Bool = true
     @State var showBackground: Bool = true
 
+    var paddingTopPercentage: Double = 0
     var paddingBottomPercentage: Double = 0
     var curvedLines: Bool = true
+
+    private var paddingTop: Double {
+        Double(frame.size.height) * paddingTopPercentage
+    }
 
     private var paddingBottom: Double {
         Double(frame.size.height) * paddingBottomPercentage
     }
 
     var step: CGPoint {
-        return CGPoint.getStep(frame: frame, data: chartData.data, paddingBottom: paddingBottom)
+        return CGPoint.getStep(frame: frame, data: chartData.data, paddingTop: paddingTop, paddingBottom: paddingBottom)
     }
 
     var path: Path {
@@ -99,7 +104,7 @@ extension Line {
 struct Line_Previews: PreviewProvider {
     static var previews: some View {
         Group {
-            Line(chartData: ChartData([8, 23, 32, 7, 23, 43]), style: redLineStyle)
+            Line(chartData: ChartData([2, 13, 65, 34, 9, -5, 5]), style: redLineStyle, paddingTopPercentage: 0.1, paddingBottomPercentage: 0.2)
                 .previewLayout(PreviewLayout.fixed(width: 300, height: 300))
         }
     }
