@@ -24,11 +24,19 @@ public struct Line: View {
     }
 
     var step: CGPoint {
-        return CGPoint.getStep(frame: frame, data: chartData.data, paddingTop: paddingTop, paddingBottom: paddingBottom)
+        var points = chartData.data
+        if points.count == 1 {
+            points = [points[0], points[0]]
+        }
+
+        return CGPoint.getStep(frame: frame, data: points, paddingTop: paddingTop, paddingBottom: paddingBottom)
     }
 
     var path: Path {
-        let points = chartData.data
+        var points = chartData.data
+        if points.count == 1 {
+            points = [points[0], points[0]]
+        }
 
         if curvedLines {
             return Path.quadCurvedPathWithPoints(points: points, step: step, paddingBottom: paddingBottom)
@@ -38,7 +46,10 @@ public struct Line: View {
     }
 
     var closedPath: Path {
-        let points = chartData.data
+        var points = chartData.data
+        if points.count == 1 {
+            points = [points[0], points[0]]
+        }
 
         if curvedLines {
             return Path.quadClosedCurvedPathWithPoints(points: points, step: step, paddingBottom: paddingBottom)
@@ -69,9 +80,14 @@ extension Line {
     }
 
     private func getClosestDataPoint(point: CGPoint) {
+        var points = chartData.data
+        if points.count == 1 {
+            points = [points[0], points[0]]
+        }
+
         let index = Int(round(point.x / step.x))
-        if index >= 0, index < chartData.data.count {
-            chartValue.currentValue = chartData.data[index]
+        if index >= 0, index < points.count {
+            chartValue.currentValue = points[index]
         }
     }
 
@@ -104,6 +120,10 @@ extension Line {
 struct Line_Previews: PreviewProvider {
     static var previews: some View {
         Group {
+            Line(chartData: ChartData([]), style: redLineStyle, paddingTopPercentage: 0.1, paddingBottomPercentage: 0.2)
+                .previewLayout(PreviewLayout.fixed(width: 300, height: 300))
+            Line(chartData: ChartData([2]), style: redLineStyle, paddingTopPercentage: 0.1, paddingBottomPercentage: 0.2)
+                .previewLayout(PreviewLayout.fixed(width: 300, height: 300))
             Line(chartData: ChartData([2, 13, 65, 34, 9, -5, 5]), style: redLineStyle, paddingTopPercentage: 0.1, paddingBottomPercentage: 0.2)
                 .previewLayout(PreviewLayout.fixed(width: 300, height: 300))
         }
